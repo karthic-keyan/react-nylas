@@ -1,39 +1,38 @@
 import { useQuery } from "react-query";
 
-export const fetchMessages = () => {
-  const response = fetch(
+export const fetchMessages = async () => {
+  const response = await fetch(
     `https://api.us.nylas.com/v3/grants/${process.env.REACT_APP_USER_ID}/messages`,
     {
       headers: {
         Authorization: `Bearer ${process.env.REACT_APP_ACCESS_TOKEN}`,
       },
     }
-  ).then((res) => {
-    return res.json();
-  });
-
-  return response;
+  );
+  return response.json();
 };
 
-const getCategory = (data) => {
-  const cat = data.filter((e) => e.includes("CATEGORY"));
-  console.log("cat", cat);
-  if (cat[0] === "CATEGORY_PERSONAL") return "Personal";
-  if (cat[0] === "CATEGORY_UPDATES") return "Update";
-  if (cat[0] === "CATEGORY_PROMOTIONS") return "Promotion";
-  else return "No Category";
+const getCategory = (folders) => {
+  const category = folders.find((folder) => folder.includes("CATEGORY"));
+  switch (category) {
+    case "CATEGORY_PERSONAL":
+      return "Personal";
+    case "CATEGORY_UPDATES":
+      return "Update";
+    case "CATEGORY_PROMOTIONS":
+      return "Promotion";
+    default:
+      return "No Category";
+  }
 };
 
 export const useFetchMessages = () => {
   return useQuery("message", fetchMessages, {
-    select: (res) => {
-      console.log("res", res);
-      return res.data.map((e) => {
-        return {
-          category: getCategory(e.folders),
-          subject: e.subject,
-        };
-      });
+    select: (data) => {
+      return data.map((message) => ({
+        category: getCategory(message.folders),
+        subject: message.subject,
+      }));
     },
   });
 };

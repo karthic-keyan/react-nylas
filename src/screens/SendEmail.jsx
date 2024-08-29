@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useMutation } from "react-query";
 
 export const SendEmail = () => {
   const [subject, setSubject] = useState("");
